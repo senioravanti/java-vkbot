@@ -1,0 +1,290 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ru.senioravanti</groupId>
+  <artifactId>vkbot</artifactId>
+  <version>1.0.0</version>
+
+  <name>vkbot</name>
+  <url>https://maven.apache.org</url>
+
+  <packaging>jar</packaging>
+
+  <properties>
+    <java.version>25</java.version>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <lombok.version>1.18.42</lombok.version>
+    <jackson.version>3.2.1</jackson.version>
+
+    <avanti.commons.loggers.version>1.0.0</avanti.commons.loggers.version>
+    <avanti.commons.result.version>1.0.0</avanti.commons.result.version>
+
+    <apache.commons.text.version>1.15.0</apache.commons.text.version>
+
+    <junit.version>6.1.1</junit.version>
+
+    <!-- Maven plugins -->
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+    <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+    <native-maven-plugin.version>1.1.3</native-maven-plugin.version>
+    <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
+
+    <!-- Custom properties -->
+    <main.class>${project.groupId}.${project.artifactId}.App</main.class>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- Logging -->
+    <dependency>
+      <groupId>ru.senioravanti.commons</groupId>
+      <artifactId>loggers</artifactId>
+      <version>${avanti.commons.loggers.version}</version>
+    </dependency>
+
+    <!-- Utils -->
+    <dependency>
+      <groupId>ru.senioravanti.commons</groupId>
+      <artifactId>result</artifactId>
+      <version>${avanti.commons.result.version}</version>
+    </dependency>
+
+    <!-- Annotation Processors -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+      <version>${lombok.version}</version>
+    </dependency>
+
+    <!-- Jackson -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+
+    <!-- Utils -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>${apache.commons.text.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <encoding>UTF-8</encoding>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven-shade-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
+            <version>0.2.0</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>shade-jar-with-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>module-info.class</exclude>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>${main.class}</Main-Class>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+              <outputFile>target/${project.artifactId}-${project.version}.jar</outputFile>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <shadedArtifactAttached>false</shadedArtifactAttached>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+    </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>config.yaml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>config.yaml</exclude>
+        </excludes>
+      </resource>
+    </resources>
+  </build>
+
+  <profiles>
+    <!-- mvn -Pnative -DskipTests native:compile -->
+    <!-- mvn -Pnative -DskipTests -DskipNativeBuild=true package exec:exec@java-agent -->
+    <!-- mvn -Pnative native:metadata-copy -->
+    <profile>
+      <id>native</id>
+      <build>
+        <plugins>
+          <!-- Документация: https://graalvm.github.io/native-build-tools/latest/maven-plugin.html -->
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <version>${native-maven-plugin.version}</version>
+            <configuration>
+              <agent>
+                <enabled>true</enabled>
+                <defaultMode>Standard</defaultMode>
+                <modes>
+                  <direct>config-output-dir=${project.build.directory}/native/agent-output</direct>
+                </modes>
+                <options>
+                  <trackReflectionMetadata>true</trackReflectionMetadata>
+                  <enableExperimentalPredefinedClasses>true</enableExperimentalPredefinedClasses>
+                  <enableExperimentalUnsafeAllocationTracing>true</enableExperimentalUnsafeAllocationTracing>
+                </options>
+                <metadataCopy>
+                  <disabledStages>
+                    <stage>test</stage>
+                  </disabledStages>
+                  <merge>true</merge>
+                  <!-- https://www.graalvm.org/latest/reference-manual/native-image/metadata/ -->
+                  <outputDirectory>${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}</outputDirectory>
+                </metadataCopy>
+              </agent>
+              <imageName>${project.name}-${project.version}.native</imageName>
+              <fallback>false</fallback>
+              <metadataRepository>
+                <enabled>true</enabled>
+              </metadataRepository>
+              <!-- -H :: hosted options -> влияют на сборку нативного образа -->
+              <buildArgs>
+                <buildArg>--enable-url-protocols=http,https</buildArg>
+                <buildArg>--enable-preview</buildArg>
+                <buildArg>--parallelism=4</buildArg>
+                <buildArg>--static-nolibc</buildArg>
+                <buildArg>-J-Xmx8g</buildArg>
+                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                <buildArg>-H:+IncludeAllLocales</buildArg>
+                <buildArg>-H:+AddAllCharsets</buildArg>
+                <buildArg>-march=native</buildArg>
+                <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
+              </buildArgs>
+              <mainClass>${main.class}</mainClass>
+            </configuration>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <id>add-reachability-metadata</id>
+                <goals>
+                  <goal>add-reachability-metadata</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>java-agent</id>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>java</executable>
+                  <workingDirectory>${project.build.directory}</workingDirectory>
+                  <arguments>
+                    <argument>-classpath</argument>
+                    <classpath/>
+                    <argument>${main.class}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

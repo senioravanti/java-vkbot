@@ -1,0 +1,21 @@
+FROM ghcr.io/graalvm/graalvm-community:25 AS builder
+
+ARG MAVEN_VERSION=3.9.16
+
+RUN curl -Lo /tmp/mvn.tar.gz "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+RUN tar -C /opt/ -xzf /tmp/mvn.tar.gz
+ENV M2_HOME="/opt/apache-maven-${MAVEN_VERSION}"
+ENV M2="$M2_HOME/bin"
+
+ENV PATH="$M2:$PATH"
+
+WORKDIR /usr/local/src/app
+COPY . /usr/local/src/app
+RUN mvn ${MAVEN_CLI_OPTS} --no-transfer-progress native:compile -Pnative -Dmaven.test.skip=true
+
+FROM debian:trixie-slim
+RUN useradd -r -s /bin/bash nonroot
+USER nonroot:nonroot
+COPY --from=builder --chown=nonroot:nonroot /usr/local/src/app/target/*.native /usr/local/bin/app
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/app"]

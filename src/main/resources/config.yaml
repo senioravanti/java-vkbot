@@ -1,0 +1,4 @@
+app:
+  group-id: @project.groupId@
+  artifact-id: @project.artifactId@
+  version: @project.version@
