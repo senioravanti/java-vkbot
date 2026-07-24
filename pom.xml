@@ -20,11 +20,14 @@
     <lombok.version>1.18.42</lombok.version>
     <jackson.version>3.2.1</jackson.version>
 
-    <avanti.commons.loggers.version>1.0.0</avanti.commons.loggers.version>
+    <avanti.commons.loggers.version>2.0.0</avanti.commons.loggers.version>
     <avanti.commons.result.version>1.0.0</avanti.commons.result.version>
 
     <apache.commons.text.version>1.15.0</apache.commons.text.version>
 
+    <jspecify.version>1.0.0</jspecify.version>
+
+    <!-- Test -->
     <junit.version>6.1.1</junit.version>
 
     <!-- Maven plugins -->
@@ -70,6 +73,13 @@
       <groupId>ru.senioravanti.commons</groupId>
       <artifactId>result</artifactId>
       <version>${avanti.commons.result.version}</version>
+    </dependency>
+
+    <!-- Annotations -->
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
     </dependency>
 
     <!-- Annotation Processors -->

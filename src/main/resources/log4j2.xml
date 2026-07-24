@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration xmlns="https://logging.apache.org/xml/ns"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="
-                   https://logging.apache.org/xml/ns
-                   https://logging.apache.org/xml/ns/log4j-config-2.xsd"
+<!-- https://issues.apache.org/jira/browse/LOG4J2-658 -->
+<Configuration
+  xmlns="https://logging.apache.org/xml/ns"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd"
+  shutdownHook="disable"
 >
   <Properties>
     <Property
@@ -16,27 +17,16 @@
     />
   </Properties>
   <Appenders>
-    <RollingFile
-      name="File"
-      fileName="${LOG_DIR_PROP}/${LOG_FILE_PROP}.json.log"
-      filePattern="${LOG_DIR_PROP}/$${date:yyyy-MM}/${LOG_FILE_PROP}-%d{yyyy-MM-dd}-%i.json.log.gz"
-
-      bufferSize="2048"
-      append="false"
-      immediateFlush="true"
+    <Console
+      name="Console"
+      target="SYSTEM_OUT"
     >
       <PrettyStructuredLoggingFormatter/>
-      <DefaultRolloverStrategy max="100"/>
-      <Policies>
-        <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
-        <SizeBasedTriggeringPolicy size="10 MB"/>
-      </Policies>
-    </RollingFile>
-
+    </Console>
   </Appenders>
   <Loggers>
     <Root level="INFO">
-      <AppenderRef ref="File"/>
+      <AppenderRef ref="Console"/>
     </Root>
     <Logger
       name="ru.senioravanti.vkbot"

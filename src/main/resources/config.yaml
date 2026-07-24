@@ -2,3 +2,13 @@ app:
   group-id: @project.groupId@
   artifact-id: @project.artifactId@
   version: @project.version@
+
+loggers:
+  max-external-frames: 5
+  max-cause-depth: 3
+
+vk:
+  group-id: "${VK_GROUP_ID}"
+  api:
+    token: "${VK_API_TOKEN}"
+    version: "${VK_API_VERSION:-5.199}"
