@@ -7,20 +7,24 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.net.http.HttpClient;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import tools.jackson.databind.PropertyNamingStrategies;
-import tools.jackson.databind.json.JsonMapper;
-
+import ru.senioravanti.vkbot.config.JacksonConfig;
 import ru.senioravanti.commons.loggers.CustomMapMessage;
 import ru.senioravanti.commons.loggers.LoggersConfig;
 import ru.senioravanti.commons.loggers.LoggersConfigHolder;
 import ru.senioravanti.commons.result.Result;
+import ru.senioravanti.vkbot.clients.VkApiClient;
 import ru.senioravanti.vkbot.bot.Bot;
 import ru.senioravanti.vkbot.bot.MessageHandler;
 import ru.senioravanti.vkbot.bot.Router;
+import ru.senioravanti.vkbot.config.ResourceBundleConfig;
+import ru.senioravanti.vkbot.exception.CustomException;
 import ru.senioravanti.vkbot.models.ConfigurationProperties;
 import ru.senioravanti.vkbot.utils.ConfigurationLoader;
+
+import static java.util.Map.entry;
 
 public class App {
     private static final Logger LOGGER = LogManager.getLogger(App.class);
@@ -60,6 +64,15 @@ public class App {
         var app = new App();
         app.start(props);
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
+        Thread.setDefaultUncaughtExceptionHandler((thread, ex) -> {
+            if (ex instanceof CustomException cex) {
+                var params = new LinkedHashMap<>(cex.getParams());
+                params.put("thread", thread.toString());
+                LOGGER.error(new CustomMapMessage(cex.getMessage(), params));
+                return;
+            }
+            LOGGER.error(CustomMapMessage.of("uncaught exception", ex, entry("thread", thread.toString())));
+        });
         try {
             Thread.currentThread().join();
         } catch (InterruptedException ex) {
@@ -71,15 +84,16 @@ public class App {
 
     private void start(ConfigurationProperties props) {
         var httpClient = HttpClient.newHttpClient();
-        var jsonMapper = JsonMapper.builder()
-            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .build();
+        var vkApiJsonMapper = JacksonConfig.newVkApiMapper();
+        var control = ResourceBundleConfig.newControl();
 
-        var messageHandler = new MessageHandler();
+        var vkApiClient = new VkApiClient(props.vk().api(), httpClient, vkApiJsonMapper);
 
-        var router = new Router(jsonMapper, messageHandler);
+        var messageHandler = new MessageHandler(control, vkApiClient);
 
-        var bot = new Bot(props.vk(), httpClient, jsonMapper, router);
+        var router = new Router(vkApiJsonMapper, messageHandler);
+
+        var bot = new Bot(props.vk().groupId(), httpClient, vkApiJsonMapper, vkApiClient, router);
         botThread = Thread.ofPlatform()
             .name("vk-bot")
             .start(bot);

@@ -8,14 +8,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Arrays;
 
-import ru.senioravanti.vkbot.exception.UnknownVkEventException;
+import ru.senioravanti.vkbot.exception.UnknownVkEventCustomException;
 
 // https://dev.vk.com/ru/api/community-events/json-schema
 @RequiredArgsConstructor
 @Getter
 public enum VkEvent {
     MESSAGE_NEW("message_new"), // Входящее сообщение
-    MESSAGE_REPLY("message_reply"), // Исходящее сообщение
     MESSAGE_EDIT("message_edit"), // Редактирование сообщения
     MESSAGE_ALLOW("message_allow"), // Разрешение на получение
     MESSAGE_DENY("message_deny"), // Запрет на получение
@@ -35,6 +34,6 @@ public enum VkEvent {
         return Arrays.stream(VkEvent.values())
             .filter(it -> it.getName().equals(name))
             .findFirst()
-            .orElseThrow(() -> new UnknownVkEventException(name));
+            .orElseThrow(() -> new UnknownVkEventCustomException(name));
     }
 }

@@ -13,7 +13,7 @@ public class CustomException extends RuntimeException {
         this.params = params;
     }
 
-    public CustomException(String message, Map<String, Object> params, Throwable ex) {
+    public CustomException(String message, Throwable ex, Map<String, Object> params) {
         super(message, ex);
         this.params = params;
     }

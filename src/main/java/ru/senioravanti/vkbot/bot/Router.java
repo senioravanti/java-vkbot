@@ -41,7 +41,6 @@ public class Router {
         this.jsonMapper = jsonMapper;
         router = Map.of(
             VkEvent.MESSAGE_NEW, unmarshal(VkEventMessage.New.class, messageHandler::onNew),
-            VkEvent.MESSAGE_REPLY, unmarshal(VkMessage.class, messageHandler::onReply),
             VkEvent.MESSAGE_EDIT, unmarshal(VkMessage.class, messageHandler::onEdit),
             VkEvent.MESSAGE_ALLOW, unmarshal(VkEventMessage.Allow.class, messageHandler::onAllow),
             VkEvent.MESSAGE_DENY, unmarshal(VkEventMessage.Deny.class, messageHandler::onDeny),

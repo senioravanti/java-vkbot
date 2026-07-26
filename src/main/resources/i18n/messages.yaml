@@ -1,1 +1,6 @@
-greeting: 👋 Привет.
+main-menu:
+  greeting: 👋 Привет.
+  keyboard:
+    images: 🖼 Работа с изображениями
+    template: 🦫 Сформировать шаблон работы
+    references: 🦉 Банк референсов

@@ -12,19 +12,37 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
+import ru.senioravanti.vkbot.models.vk.attachments.VkAttachment;
+
 // https://dev.vk.com/ru/reference/objects/message
+
+/**
+ * @param id              идентификатор сообщения
+ * @param date            время отправки в Unixtime
+ * @param peerId          идентификатор назначения
+ * @param fromId          идентификатор отправителя
+ * @param text
+ * @param formatData      информация о форматировании текста сообщения
+ * @param attachments     медиавложения сообщения (фотографии, ссылки и т.п.).
+ * @param payload         дополнительные данные в формате JSON-строки
+ * @param type            тип сообщения
+ * @param forwardMessages пересланные сообщения
+ */
 public record VkMessage(
-    Integer id, // Идентификатор сообщения
-    Instant date, // Время отправки в Unixtime
-    Long peerId, // Идентификатор назначения
-    Long fromId, // Идентификатор отправителя
-    String text, // Текст сообщения
-    FormatData formatData, // Информация о форматировании текста сообщения
-    List<Attachment> attachments, // Медиавложения сообщения (фотографии, ссылки и т.п.).
+    Integer id,
+    Instant date,
+    Long peerId,
+    Long fromId,
+    String text,
+    @Nullable
+    FormatData formatData,
+    List<VkAttachment> attachments,
+    @Nullable
+    String payload,
     @JsonProperty("out")
-    Type type, // Тип сообщения
+    Type type,
     @JsonProperty("fwd_messages")
-    List<VkMessage> forwardMessages // Пересланные сообщения
+    List<VkMessage> forwardMessages
 ) {
     @RequiredArgsConstructor
     public enum Type {
@@ -82,14 +100,5 @@ public record VkMessage(
                 }
             }
         }
-    }
-
-    // https://dev.vk.com/ru/reference/objects/attachments-message
-    public record Attachment(
-        String type,
-        @Nullable VkPhoto photo,
-        @Nullable VkLink link,
-        @Nullable VkDocument doc
-    ) {
     }
 }

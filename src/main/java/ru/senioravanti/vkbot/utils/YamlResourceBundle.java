@@ -7,7 +7,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
-import static ru.senioravanti.vkbot.utils.JacksonUtils.OBJECT_TYPE_REFERENCE;
+import static ru.senioravanti.vkbot.config.JacksonConfig.OBJECT_TYPE_REFERENCE;
 
 public class YamlResourceBundle extends ResourceBundle {
     private static final YAMLMapper YAML = new YAMLMapper();
