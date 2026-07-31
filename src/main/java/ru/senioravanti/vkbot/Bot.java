@@ -1,4 +1,4 @@
-package ru.senioravanti.vkbot.bot;
+package ru.senioravanti.vkbot;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,16 +12,15 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpClient;
-import java.time.Duration;
 
 import static java.util.Map.entry;
 
 import ru.senioravanti.commons.loggers.CustomMapMessage;
 import ru.senioravanti.vkbot.clients.VkApiClient;
-import ru.senioravanti.vkbot.exception.CustomException;
 import ru.senioravanti.vkbot.models.vk.method.groups.GroupsGetLongPollServer;
 import ru.senioravanti.vkbot.models.vk.LongPollResponse;
 import ru.senioravanti.vkbot.models.vk.LongPollResponse.Failure;
+import ru.senioravanti.vkbot.handlers.Router;
 
 @RequiredArgsConstructor
 public class Bot implements Runnable {
@@ -66,7 +65,8 @@ public class Bot implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                var longPollServer = vkApiClient.call("groups.getLongPollServer", new GroupsGetLongPollServer.Request(groupId), GroupsGetLongPollServer.Response.class);
+                var request = new GroupsGetLongPollServer.Request(groupId);
+                var longPollServer = vkApiClient.call(new GroupsGetLongPollServer(request));
                 LOGGER.info(CustomMapMessage.of("vk bot successfully started ...",
                     entry("server", longPollServer.server())
                 ));

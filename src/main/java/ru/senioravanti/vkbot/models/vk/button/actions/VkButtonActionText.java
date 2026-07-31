@@ -3,18 +3,18 @@ package ru.senioravanti.vkbot.models.vk.button.actions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import ru.senioravanti.vkbot.exception.ValidationCustomException;
+import ru.senioravanti.vkbot.models.vk.button.VkButtonPayload;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record VkButtonActionText(
     // Текст кнопки.
     String label,
-    String payload
+    VkButtonPayload payload
 ) implements VkButtonAction {
     public static final int MAX_LABEL_LENGTH = 40;
     public static final String TYPE = "text";
 
     public VkButtonActionText {
-        validatePayload();
         if (label.length() > MAX_LABEL_LENGTH) {
             throw new ValidationCustomException(ValidationCustomException.Error.builder()
                 .name("label")

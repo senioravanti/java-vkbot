@@ -3,21 +3,22 @@ package ru.senioravanti.vkbot.models.vk.button.actions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import ru.senioravanti.vkbot.exception.ValidationCustomException;
+import ru.senioravanti.vkbot.models.vk.button.VkButtonPayload;
 
 /**
  * @param label текст кнопки.
- * @param payload
+ * @param payload дополнительные данные в JSON-формате. Они будут отправлены серверу бота в сообщении message_event, в поле payload.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record VkButtonActionCallback(
     String label,
-    String payload
+    VkButtonPayload payload
 ) implements VkButtonAction {
+
     public static final String TYPE = "callback";
     public static final int MAX_LABEL_LENGTH = 40;
 
     public VkButtonActionCallback {
-        validatePayload();
         if (label.length() > MAX_LABEL_LENGTH) {
             throw new ValidationCustomException(ValidationCustomException.Error.builder()
                 .name("label")

@@ -20,8 +20,11 @@
     <lombok.version>1.18.42</lombok.version>
     <jackson.version>3.2.1</jackson.version>
 
-    <avanti.commons.loggers.version>2.0.0</avanti.commons.loggers.version>
+    <avanti.commons.loggers.version>2.0.1</avanti.commons.loggers.version>
     <avanti.commons.result.version>1.0.0</avanti.commons.result.version>
+
+    <docx4j.version>17.0.1</docx4j.version>
+    <commonmark.version>0.29.0</commonmark.version>
 
     <apache.commons.text.version>1.15.0</apache.commons.text.version>
 
@@ -103,6 +106,21 @@
     <dependency>
       <groupId>tools.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+
+    <!-- https://github.com/plutext/docx4j/blob/VERSION_17_0_3/docs/Docx4j_GettingStarted.pdf -->
+    <!-- Docx4j -->
+    <dependency>
+      <groupId>org.docx4j</groupId>
+      <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+      <version>${docx4j.version}</version>
+    </dependency>
+
+    <!-- Markdown support -->
+    <dependency>
+      <groupId>org.commonmark</groupId>
+      <artifactId>commonmark</artifactId>
+      <version>${commonmark.version}</version>
     </dependency>
 
     <!-- Utils -->

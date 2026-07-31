@@ -1,6 +1,5 @@
 package ru.senioravanti.vkbot.models.vk.events;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,7 +11,6 @@ import ru.senioravanti.vkbot.exception.UnknownVkEventCustomException;
 
 // https://dev.vk.com/ru/api/community-events/json-schema
 @RequiredArgsConstructor
-@Getter
 public enum VkEvent {
     MESSAGE_NEW("message_new"), // Входящее сообщение
     MESSAGE_EDIT("message_edit"), // Редактирование сообщения

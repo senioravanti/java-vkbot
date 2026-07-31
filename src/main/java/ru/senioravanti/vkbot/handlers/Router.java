@@ -1,4 +1,4 @@
-package ru.senioravanti.vkbot.bot;
+package ru.senioravanti.vkbot.handlers;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,11 +22,6 @@ public class Router {
     @FunctionalInterface
     public interface VkUpdateHandler {
         void handle(VkUpdate update);
-    }
-
-    @FunctionalInterface
-    public interface Handler<T> {
-        void handle(T object);
     }
 
     private static final Logger LOGGER = LogManager.getLogger(Router.class);
@@ -63,8 +58,8 @@ public class Router {
         };
     }
 
-    public void dispatch(VkUpdate update) {
-        LOGGER.debug(new CustomMapMessage(update));
-        router.get(update.type()).handle(update);
+    public void dispatch(VkUpdate u) {
+        LOGGER.debug(new CustomMapMessage(u));
+        router.get(u.type()).handle(u);
     }
 }

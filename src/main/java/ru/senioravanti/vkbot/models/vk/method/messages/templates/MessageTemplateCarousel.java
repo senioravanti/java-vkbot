@@ -11,9 +11,9 @@ import ru.senioravanti.vkbot.models.vk.button.VkButton;
 
 // https://dev.vk.com/ru/api/bots/development/messages#%D0%9E%D1%82%D0%BF%D1%80%D0%B0%D0%B2%D0%BA%D0%B0%20%D0%BA%D0%B0%D1%80%D1%83%D1%81%D0%B5%D0%BB%D0%B5%D0%B9
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record MessageSendTemplateCarousel(
+public record MessageTemplateCarousel(
     List<Element> elements
-) implements MessageSendTemplate {
+) implements MessageTemplate {
     public static final String TYPE = "carousel";
 
     public record Element(

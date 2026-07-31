@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     include = JsonTypeInfo.As.PROPERTY
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = MessageSendTemplateCarousel.class, name = MessageSendTemplateCarousel.TYPE)
+    @JsonSubTypes.Type(value = MessageTemplateCarousel.class, name = MessageTemplateCarousel.TYPE)
 })
-public sealed interface MessageSendTemplate
-    permits MessageSendTemplateCarousel
+public sealed interface MessageTemplate
+    permits MessageTemplateCarousel
 {
     String type();
 }

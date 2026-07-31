@@ -10,18 +10,21 @@ import java.net.http.HttpClient;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import ru.senioravanti.vkbot.config.JacksonConfig;
 import ru.senioravanti.commons.loggers.CustomMapMessage;
 import ru.senioravanti.commons.loggers.LoggersConfig;
 import ru.senioravanti.commons.loggers.LoggersConfigHolder;
 import ru.senioravanti.commons.result.Result;
-import ru.senioravanti.vkbot.clients.VkApiClient;
-import ru.senioravanti.vkbot.bot.Bot;
-import ru.senioravanti.vkbot.bot.MessageHandler;
-import ru.senioravanti.vkbot.bot.Router;
+import ru.senioravanti.vkbot.config.JacksonConfig;
 import ru.senioravanti.vkbot.config.ResourceBundleConfig;
+import ru.senioravanti.vkbot.clients.VkApiClient;
 import ru.senioravanti.vkbot.exception.CustomException;
+import ru.senioravanti.vkbot.handlers.SimpleCommandHandler;
 import ru.senioravanti.vkbot.models.ConfigurationProperties;
+import ru.senioravanti.vkbot.stores.SessionStore;
+import ru.senioravanti.vkbot.services.MessageService;
+import ru.senioravanti.vkbot.handlers.MessageHandler;
+import ru.senioravanti.vkbot.handlers.Router;
+import ru.senioravanti.vkbot.handlers.TemplateCommandHandler;
 import ru.senioravanti.vkbot.utils.ConfigurationLoader;
 
 import static java.util.Map.entry;
@@ -89,7 +92,13 @@ public class App {
 
         var vkApiClient = new VkApiClient(props.vk().api(), httpClient, vkApiJsonMapper);
 
-        var messageHandler = new MessageHandler(control, vkApiClient);
+        var sessionStore = new SessionStore(vkApiClient);
+
+        var messageService = new MessageService(control, vkApiClient);
+
+        var simpleCommandHandler = new SimpleCommandHandler(messageService);
+        var templateCommandHandler = new TemplateCommandHandler(control, messageService);
+        var messageHandler = new MessageHandler(sessionStore, messageService, templateCommandHandler, simpleCommandHandler);
 
         var router = new Router(vkApiJsonMapper, messageHandler);
 

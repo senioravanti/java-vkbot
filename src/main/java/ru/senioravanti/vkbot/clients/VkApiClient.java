@@ -2,6 +2,9 @@ package ru.senioravanti.vkbot.clients;
 
 import lombok.RequiredArgsConstructor;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -15,23 +18,26 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 
+import ru.senioravanti.commons.loggers.CustomMapMessage;
 import ru.senioravanti.vkbot.exception.CustomException;
 import ru.senioravanti.vkbot.exception.VkApiCustomException;
 import ru.senioravanti.vkbot.models.ConfigurationProperties;
-import ru.senioravanti.vkbot.models.vk.VkResponse;
+import ru.senioravanti.vkbot.models.vk.method.Method;
 import ru.senioravanti.vkbot.utils.MiscellaneousUtils;
 
 import static ru.senioravanti.vkbot.config.JacksonConfig.OBJECT_TYPE_REFERENCE;
 
 @RequiredArgsConstructor
 public class VkApiClient {
+    private final static Logger LOGGER = LogManager.getLogger(VkApiClient.class);
+
     private final ConfigurationProperties.Vk.Api props;
     private final HttpClient httpClient;
     private final JsonMapper jsonMapper;
 
-    public <T1, T2> T2 call(String method, T1 params, Class<T2> responseType) {
+    public <T1, T2> T2 call(Method<T1, T2> m) {
         var queryParams = jsonMapper
-            .convertValue(params, OBJECT_TYPE_REFERENCE)
+            .convertValue(m.params(), OBJECT_TYPE_REFERENCE)
             .entrySet().stream()
             .map(it -> {
                 var value = it.getValue();
@@ -47,7 +53,7 @@ public class VkApiClient {
             })
             .collect(joining("&"));
         var uri = "https://api.vk.com/method/"
-            + method
+            + m.name()
             + "?access_token=" + props.token()
             + "&scope=manage"
             + "&v=" + props.version()
@@ -58,15 +64,17 @@ public class VkApiClient {
                     .newBuilder(URI.create(uri))
                     .GET()
                     .build(),
-                HttpResponse.BodyHandlers.ofInputStream()
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
-            VkResponse<T2> body = jsonMapper.readValue(response.body(), jsonMapper.getTypeFactory().constructParametricType(VkResponse.class, responseType));
-            if (body.error() != null) throw new VkApiCustomException(method, body.error());
+            var rawBody = jsonMapper.readValue(response.body(), OBJECT_TYPE_REFERENCE);
+            LOGGER.trace(new CustomMapMessage(rawBody));
+            var body = jsonMapper.convertValue(rawBody, m.responseType());
+            if (body.error() != null) throw new VkApiCustomException(m.name(), body.error());
             return body.response();
         } catch (IOException | InterruptedException ex) {
             throw new CustomException("failed to execute request", ex, Map.of(
-                "method", method,
-                "params", params
+                "method", m.name(),
+                "params", m.params()
             ));
         }
     }

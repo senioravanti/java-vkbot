@@ -1,40 +1,39 @@
 package ru.senioravanti.vkbot.models.vk.method.messages;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Builder;
 
-import org.jspecify.annotations.Nullable;
+import com.fasterxml.jackson.annotation.*;
+import tools.jackson.core.type.TypeReference;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import com.fasterxml.jackson.annotation.*;
-
-import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.stream.Collectors.joining;
 
-import ru.senioravanti.vkbot.exception.ValidationCustomException;
-import ru.senioravanti.vkbot.models.vk.method.messages.templates.MessageSendTemplate;
+import ru.senioravanti.vkbot.models.vk.VkResponse;
+import ru.senioravanti.vkbot.models.vk.method.Method;
 
-// https://dev.vk.com/ru/method/messages.send
-public class MessagesSend {
-    private static final Random RANDOM = new SecureRandom();
+/**
+ * <a href="https://dev.vk.com/ru/method/messages.send">Документация</a>
+ */
+public record MessageSend(Request params) implements Method<MessageSend.Request, Long> {
 
-    private MessagesSend() {
+    @Override
+    public String name() {
+        return "messages.send";
+    }
+
+    @Override
+    public TypeReference<VkResponse<Long>> responseType() {
+        return new TypeReference<>() {
+        };
     }
 
     /**
-     * @param userId              идентификатор пользователя, которому отправляется сообщение. Вместо него можно использовать peer_id.
      * @param randomId            идентификатор, предназначенный для предотвращения повторной отправки одного и того же сообщения; 0 -> проверка на уникальность не нужна, Любое другое число в пределах int32 -> проверка на уникальность нужна.
-     * @param message             текст личного сообщения. Макс. длина = 9000.
-     * @param attachments         объект или несколько объектов, приложенных к записи
-     * @param keyboard            объект, описывающий клавиатуру бота.
-     * @param template
      * @param replyTo             идентификатор сообщения, на которое требуется ответить
-     * @param peerId              идентификатор получателя сообщения.
-     * @param peerIdList          идентификаторы получателей сообщения
      * @param domain              короткий адрес пользователя, например: persik_ryzhiy
      * @param chatId              идентификатор беседы, в которую отправляется сообщение.
      * @param stickerId           идентификатор стикера.
@@ -44,20 +43,11 @@ public class MessagesSend {
      */
     @Builder
     public record Request(
-        Long userId,
+        @JsonUnwrapped
+        MessageRequest message,
         Integer randomId,
-        String message,
-        @JsonIgnore
-        List<Attachment> attachments,
-        @JsonInclude(Include.NON_NULL)
-        MessageSendKeyboard keyboard,
-        @JsonInclude(Include.NON_NULL)
-        MessageSendTemplate template,
         @JsonInclude(Include.NON_NULL)
         Integer replyTo,
-        Long peerId,
-        @JsonIgnore
-        List<Long> peerIdList,
         @JsonInclude(Include.NON_NULL)
         String domain,
         @JsonInclude(Include.NON_NULL)
@@ -71,43 +61,6 @@ public class MessagesSend {
         @JsonInclude(Include.NON_NULL)
         Forward forward
     ) {
-        /**
-         * Медиавложение
-         *
-         * @param type
-         * @param ownerId идентификатор владельца. Идентификатор сообщества должен начинаться со знака -.
-         * @param mediaId
-         */
-        public record Attachment(
-            Type type,
-            String ownerId,
-            String mediaId
-        ) {
-            @RequiredArgsConstructor
-            public enum Type {
-                PHOTO("photo"),
-                VIDEO("video"),
-                AUDIO("audio"),
-                DOCUMENT("doc"),
-                WALL("wall"),
-                MARKET("market"),
-                POLL("poll"),
-                QUESTION("question");
-
-                private final String name;
-
-                @JsonValue
-                public String getName() {
-                    return name;
-                }
-            }
-
-            @Override
-            public String toString() {
-                return "%s%s_%s".formatted(type.getName(), ownerId, mediaId);
-            }
-        }
-
         /**
          * @param ownerId           владелец сообщений. Укажите это поле, если вы хотите переслать сообщения из сообщества в личный диалог.
          * @param peerId            идентификатор места, из которого необходимо переслать сообщения.
@@ -181,26 +134,6 @@ public class MessagesSend {
             }
         }
 
-        public static final int MAX_MESSAGE_LENGTH = 9000;
-
-        @JsonInclude(Include.NON_EMPTY)
-        @JsonGetter("attachment")
-        public String attachment() {
-            if (attachments == null) return null;
-            return attachments.stream()
-                .map(Attachment::toString)
-                .collect(joining(","));
-        }
-
-        @JsonInclude(Include.NON_EMPTY)
-        @JsonGetter("peer_ids")
-        public String peerIds() {
-            if (peerIdList == null) return null;
-            return peerIdList.stream()
-                .map(String::valueOf)
-                .collect(joining(","));
-        }
-
         @JsonInclude(Include.NON_EMPTY)
         @JsonGetter("forward_messages")
         public String forwardMessages() {
@@ -212,33 +145,8 @@ public class MessagesSend {
 
         public Request {
             if (randomId == null) {
-                randomId = RANDOM.nextInt(Integer.MAX_VALUE) + 1;
-            }
-            if (peerId == null) {
-                peerId = userId;
-            }
-            if (message.length() > MAX_MESSAGE_LENGTH) {
-                throw new ValidationCustomException(ValidationCustomException.Error.builder()
-                    .name("message")
-                    .invalidValue(message.length())
-                    .message("message length must be <= " + MAX_MESSAGE_LENGTH)
-                    .build());
+                randomId = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) + 1;
             }
         }
-    }
-
-    /**
-     * @param messageId             идентификатор сообщения
-     * @param peerId                идентификатор назначения
-     * @param conversationMessageId идентификатор сообщения в диалоге
-     * @param error                 сообщение об ошибке, если сообщение не было доставлено получателю
-     */
-    public record Response(
-        Long messageId,
-        Long peerId,
-        Long conversationMessageId,
-        @Nullable
-        String error
-    ) {
     }
 }

@@ -1,6 +1,7 @@
 package ru.senioravanti.vkbot.models.vk.button.actions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ru.senioravanti.vkbot.models.vk.button.VkButtonPayload;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record VkButtonActionLink(
@@ -8,16 +9,12 @@ public record VkButtonActionLink(
     String link,
     // Текст кнопки.
     String label,
-    String payload
+    VkButtonPayload payload
 ) implements VkButtonAction {
     public static final String TYPE = "open_link";
 
     @Override
     public String type() {
         return TYPE;
-    }
-
-    public VkButtonActionLink {
-        validatePayload();
     }
 }

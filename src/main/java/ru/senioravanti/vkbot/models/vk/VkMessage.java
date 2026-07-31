@@ -1,6 +1,8 @@
 package ru.senioravanti.vkbot.models.vk;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 import org.jspecify.annotations.Nullable;
 
@@ -44,20 +46,19 @@ public record VkMessage(
     @JsonProperty("fwd_messages")
     List<VkMessage> forwardMessages
 ) {
+    @Accessors(fluent = true)
+    @Getter
     @RequiredArgsConstructor
     public enum Type {
         REPLIED(-1), // Пересланное
         RECEIVED(0), // Полученное
         SENT(1); // Отправленное
 
+        @JsonValue
         private final int code;
 
-        @JsonValue
-        public int getCode() {
-            return code;
-        }
-
-        public static Type from(Integer code) {
+        @JsonCreator
+        public static Type of(Integer code) {
             if (code == null) return REPLIED;
             return Arrays.stream(Type.values())
                 .filter(it -> it.code == code)
