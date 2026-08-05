@@ -71,8 +71,8 @@ public class Bot implements Runnable {
                     entry("server", longPollServer.server())
                 ));
                 poll(longPollServer);
-            } catch (Exception ex) {
-                LOGGER.error(new CustomMapMessage("unhandled exception", ex));
+            } catch (IOException | InterruptedException  ex) {
+                LOGGER.error(new CustomMapMessage("failed to execute http request", ex));
             }
         }
     }

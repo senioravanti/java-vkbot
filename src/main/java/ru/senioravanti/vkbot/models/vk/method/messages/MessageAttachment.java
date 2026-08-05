@@ -5,15 +5,16 @@ import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Медиавложение
+ * <a href="https://dev.vk.com/ru/method/messages.send">Медиавложение</a>
  * @param type
- * @param ownerId идентификатор владельца. Идентификатор сообщества должен начинаться со знака -.
  * @param mediaId
+ * @param ownerId идентификатор владельца. Идентификатор сообщества должен начинаться со знака -.
+ * @see ru.senioravanti.vkbot.models.vk.attachments.VkAttachment
  */
 public record MessageAttachment(
     Type type,
-    String ownerId,
-    String mediaId
+    Long mediaId,
+    Long ownerId
 ) {
     @RequiredArgsConstructor
     public enum Type {

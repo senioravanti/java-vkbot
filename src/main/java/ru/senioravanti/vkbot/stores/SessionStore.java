@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import ru.senioravanti.vkbot.clients.VkApiClient;
 import ru.senioravanti.vkbot.exception.SessionNotFoundException;
 import ru.senioravanti.vkbot.models.commands.Session;
+import ru.senioravanti.vkbot.models.vk.method.messages.MessagesGetHistory;
 import ru.senioravanti.vkbot.models.vk.method.users.UserGet;
 
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class SessionStore {
     private final ConcurrentHashMap<Long, Session> store = new ConcurrentHashMap<>();
     private final VkApiClient vkApiClient;
 
-    public Session init(Long userId, Locale locale) {
+    private Session init(Long userId, Locale locale) {
         var user = vkApiClient
             .call(new UserGet(UserGet.Request.of(userId)))
             .getFirst();
@@ -31,7 +32,15 @@ public class SessionStore {
             user.birthday(),
             locale
         ));
-        store.put(userId, session);
+        var lastMessage = vkApiClient
+            .call(new MessagesGetHistory(new MessagesGetHistory.Request(user.id())))
+            .items()
+            .getFirst();
+        // from_id для сообщества -> идентификатор сообщества, умноженный на -1
+        Consumer<Long> setter = Long.signum(lastMessage.fromId()) == -1
+            ? session::setLastBotMessageId
+            : session::setLastUserMessageId;
+        setter.accept(lastMessage.id());
         return session;
     }
 
@@ -39,20 +48,7 @@ public class SessionStore {
         return store.get(userId);
     }
 
-    public Session getOrThrow(Long userId) {
-        return Optional
-            .ofNullable(store.get(userId))
-            .orElseThrow(SessionNotFoundException::new);
-    }
-
     public Session getOrInit(Long userId, Locale locale) {
         return store.computeIfAbsent(userId, it -> init(it, locale));
-    }
-
-    public void mutate(Long userId, Consumer<Session> mutator) {
-        var session = getOrThrow(userId);
-        synchronized (session) {
-            mutator.accept(session);
-        }
     }
 }

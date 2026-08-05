@@ -9,21 +9,25 @@ import com.jayway.jsonpath.JsonPath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.Map.entry;
 
 import ru.senioravanti.vkbot.config.JacksonConfig;
 import ru.senioravanti.vkbot.exception.CustomException;
 import ru.senioravanti.commons.loggers.CustomMapMessage;
+import ru.senioravanti.vkbot.models.PasswordEncoder;
 import ru.senioravanti.vkbot.models.commands.TemplateCommand;
 import ru.senioravanti.vkbot.models.vk.VkBirthday;
 import ru.senioravanti.vkbot.models.vk.method.messages.MessageAttachment;
-import ru.senioravanti.vkbot.models.vk.method.messages.MessageSend;
+import ru.senioravanti.vkbot.models.vk.method.messages.MessageRequest;
 import ru.senioravanti.vkbot.models.vk.attachments.VkAttachment;
+import ru.senioravanti.vkbot.utils.PasswordGenerator;
 import ru.senioravanti.vkbot.utils.YamlResourceBundle;
 
 public class AppTest {
@@ -73,7 +77,7 @@ public class AppTest {
         assertDoesNotThrow(() -> {
             var attachment = jsonMapper.readValue(json, VkAttachment.class);
             LOGGER.info(new CustomMapMessage(attachment));
-            assertEquals("photo", attachment.type());
+            assertInstanceOf(VkAttachment.Photo.class, attachment);
         });
     }
 
@@ -98,23 +102,20 @@ public class AppTest {
     @Test
     void shouldSerializeSendMessage() {
         var jsonMapper = JacksonConfig.newVkApiMapper();
-        var messageSend = MessageSend.Request.builder()
+        var rnd = ThreadLocalRandom.current();
+        var messageSend = MessageRequest.builder()
             .userId(7878L)
-            .message("Привет, мир!")
-            .peerIdList(List.of(228L, 777L, 666L))
+            .text("Привет, мир!")
             .attachments(List.of(
-                new MessageAttachment(MessageAttachment.Type.DOCUMENT, "-222596926", UUID.randomUUID().toString()),
-                new MessageAttachment(MessageAttachment.Type.PHOTO, "-222596926", UUID.randomUUID().toString())
+                new MessageAttachment(MessageAttachment.Type.DOCUMENT, -222596926L, rnd.nextLong()),
+                new MessageAttachment(MessageAttachment.Type.PHOTO, -222596926L, rnd.nextLong())
             ))
-            .contentSource(new MessageSend.Request.ContentSourceUrl("https://vk.com/…"))
             .build();
         var json = jsonMapper
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(messageSend);
         IO.println(json);
         var jsonPath = JsonPath.parse(json);
-        assertEquals("228,777,666", jsonPath.read("$.peer_ids"));
-        assertEquals("url", jsonPath.read("$.content_source.type"));
         assertNotNull(jsonPath.read("$.attachment"));
     }
 
@@ -136,5 +137,24 @@ public class AppTest {
         var json = jsonMapper.writeValueAsString(type);
         LOGGER.info(json);
         assertEquals("\"course-work\"", json);
+    }
+
+    @Test
+    void shouldGeneratePassword() {
+        for (var l : new int[]{8, 12, 16, 24, 32})
+            assertTrue(Arrays
+                .stream(PasswordEncoder.values())
+                .map(e -> PasswordGenerator.generate(e, l))
+                .peek(it -> {
+                    Map<String, Object> params = Map.of(
+                        "password", it,
+                        "actualLength", it.length(),
+                        "requiredLength", l
+                    );
+                    LOGGER.info(new CustomMapMessage(params));
+                })
+                .map(String::length)
+                .allMatch(it -> it == l)
+            );
     }
 }

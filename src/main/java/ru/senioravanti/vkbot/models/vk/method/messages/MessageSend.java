@@ -16,7 +16,7 @@ import ru.senioravanti.vkbot.models.vk.VkResponse;
 import ru.senioravanti.vkbot.models.vk.method.Method;
 
 /**
- * <a href="https://dev.vk.com/ru/method/messages.send">Документация</a>
+ * <a href="https://dev.vk.com/ru/method/messages.send">Отправляет сообщение</a>
  */
 public record MessageSend(Request params) implements Method<MessageSend.Request, Long> {
 

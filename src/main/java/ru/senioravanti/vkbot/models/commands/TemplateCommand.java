@@ -58,7 +58,7 @@ public final class TemplateCommand implements Command {
             return Arrays.stream(Type.values())
                 .filter(it -> it.code.equals(code))
                 .findFirst()
-                .orElseThrow(() -> new CustomException("unknown template type", Map.of("code", code)));
+                .orElseThrow(() -> new CustomException("unknown template type", Map.of("type", code)));
         }
     }
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import static java.util.stream.Collectors.joining;
 
 import ru.senioravanti.vkbot.exception.ValidationCustomException;
+import ru.senioravanti.vkbot.models.vk.VkFormatData;
 import ru.senioravanti.vkbot.models.vk.method.messages.templates.MessageTemplate;
 
 /**
@@ -22,6 +23,7 @@ import ru.senioravanti.vkbot.models.vk.method.messages.templates.MessageTemplate
  * @param attachments объект или несколько объектов, приложенных к записи
  * @param keyboard    объект, описывающий клавиатуру бота.
  * @param template
+ * @see ru.senioravanti.vkbot.models.vk.VkMessage
  */
 @Builder
 public record MessageRequest(
@@ -29,11 +31,13 @@ public record MessageRequest(
     Long userId,
     @JsonProperty("message")
     String text,
-    @JsonIgnore
+    @JsonInclude(Include.NON_NULL)
+    VkFormatData formatData,
+    @JsonIgnore()
     List<MessageAttachment> attachments,
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     MessageKeyboard keyboard,
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     MessageTemplate template
 ) {
     public static final int MAX_MESSAGE_LENGTH = 9000;

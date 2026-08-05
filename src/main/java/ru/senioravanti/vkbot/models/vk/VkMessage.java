@@ -16,9 +16,8 @@ import java.util.List;
 
 import ru.senioravanti.vkbot.models.vk.attachments.VkAttachment;
 
-// https://dev.vk.com/ru/reference/objects/message
-
 /**
+ * <a href="https://dev.vk.com/ru/reference/objects/message">Личное сообщение</a>
  * @param id              идентификатор сообщения
  * @param date            время отправки в Unixtime
  * @param peerId          идентификатор назначения
@@ -31,13 +30,13 @@ import ru.senioravanti.vkbot.models.vk.attachments.VkAttachment;
  * @param forwardMessages пересланные сообщения
  */
 public record VkMessage(
-    Integer id,
+    Long id,
     Instant date,
     Long peerId,
     Long fromId,
     String text,
     @Nullable
-    FormatData formatData,
+    VkFormatData formatData,
     List<VkAttachment> attachments,
     @Nullable
     String payload,
@@ -64,42 +63,6 @@ public record VkMessage(
                 .filter(it -> it.code == code)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("unknown message type `%s`".formatted(code)));
-        }
-    }
-
-    public record FormatData(
-        String version, // Версия форматирования
-        List<Item> items // Массив объектов с параметрами форматирования
-    ) {
-        public record Item(
-            Long offset, // Позиция символа, начиная с которого применяется указанный тип форматирования
-            Long length, // Количество символов, на которые распространяется указанный тип форматирования
-            Type type, // Тип форматирования, примененный к диапазону символов
-            String url // Адрес ссылки, если в type указан тип url
-        ) {
-            @RequiredArgsConstructor
-            public enum Type {
-                BOLD("bold"),
-                ITALIC("italic"),
-                URL("url"),
-                UNDERLINE("underline");
-
-                public final String name;
-
-                @JsonValue
-                public String getName() {
-                    return name;
-                }
-
-                @JsonCreator
-                public static Type from(String name) {
-                    if (name == null) return null;
-                    return Arrays.stream(Type.values())
-                        .filter(it -> it.name.equals(name))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("unknown type `%s`".formatted(name)));
-                }
-            }
         }
     }
 }

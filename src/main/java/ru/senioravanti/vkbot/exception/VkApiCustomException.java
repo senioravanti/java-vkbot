@@ -8,9 +8,9 @@ import ru.senioravanti.vkbot.models.vk.VkError;
 
 @Getter
 public class VkApiCustomException extends CustomException {
-    public VkApiCustomException(String method, VkError error) {
+    public VkApiCustomException(String uri, VkError error) {
         super("vk api error response", Map.of(
-            "method", method,
+            "uri", uri,
             "error", error
         ));
     }

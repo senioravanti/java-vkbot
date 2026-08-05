@@ -24,30 +24,31 @@ import ru.senioravanti.vkbot.models.vk.button.VkButtonPayload;
 import ru.senioravanti.vkbot.services.MessageService;
 import ru.senioravanti.vkbot.utils.KeyboardUtils;
 
-import static ru.senioravanti.vkbot.models.vk.button.VkButtonPayload.Code;
+import static ru.senioravanti.vkbot.models.vk.button.VkButtonPayload.Type;
 
 @RequiredArgsConstructor
 public class TemplateCommandHandler implements CommandHandler.Callback {
     private static final Logger LOGGER = LogManager.getLogger(TemplateCommandHandler.class);
+    private static final String PREFIX = "template";
 
     private final ResourceBundle.Control control;
     private final MessageService messageService;
 
     @Override
-    public EnumMap<Code, CallbackHandler> callbackHandlers() {
+    public EnumMap<Type, CallbackHandler> callbackHandlers() {
         return new EnumMap<>(Map.of(
-            Code.TEMPLATE, this::onStart,
-            Code.TEMPLATE_SELECT_TYPE, this::onSelectType,
-            Code.TEMPLATE_SELECT_NUMBER, this::onSelectNumber
+            Type.TEMPLATE, this::onStart,
+            Type.TEMPLATE_SELECT_TYPE, this::onSelectType,
+            Type.TEMPLATE_SELECT_NUMBER, this::onSelectNumber
         ));
     }
 
-    private void onStart(VkEventMessage.Event evt, Session session) {
+    private void onStart(Session session, VkEventMessage.Event evt) {
         session.setCommand(new TemplateCommand());
         var b = ResourceBundle.getBundle(ResourceBundleConfig.NAME, session.getUser().locale(), control);
-        var prefix = "template.type";
+        var prefix = PREFIX + ".type";
         var typeButtons = Arrays.stream(TemplateCommand.Type.values())
-            .map(it -> new VkButtonActionCallback(b.getString(prefix + "." + it.code()), new VkButtonPayload(Code.TEMPLATE_SELECT_TYPE, it.code())))
+            .map(it -> new VkButtonActionCallback(b.getString(prefix + "." + it.code()), new VkButtonPayload(Type.TEMPLATE_SELECT_TYPE, it.code())))
             .map(VkButton::new)
             .map(List::of)
             .toList();
@@ -55,13 +56,13 @@ public class TemplateCommandHandler implements CommandHandler.Callback {
         grid.add(List.of(KeyboardUtils.newCancelButton(b)));
         messageService.sendOrEditMessage(session, r -> r
             .text(b.getString(prefix + ".title"))
-            .keyboard(MessageKeyboard.newInline(grid))
+            .keyboard(MessageKeyboard.fromGrid(grid))
         );
     }
 
-    public void onSelectType(VkEventMessage.Event evt, Session session) {
+    public void onSelectType(Session session, VkEventMessage.Event evt) {
         var cmd = (TemplateCommand) session.getCommand();
-        var type = TemplateCommand.Type.of(evt.payload().id());
+        var type = TemplateCommand.Type.of(evt.payload().text());
         cmd.setType(type);
         var b = ResourceBundle.getBundle(ResourceBundleConfig.NAME, session.getUser().locale(), control);
         var prefix = "template";
@@ -73,7 +74,7 @@ public class TemplateCommandHandler implements CommandHandler.Callback {
                 var row = new ArrayList<VkButton>();
                 for (int j = 0; j < 3; j++) {
                     var label = String.valueOf(i * 3 + j + 1);
-                    row.add(new VkButton(new VkButtonActionCallback(label, new VkButtonPayload(Code.TEMPLATE_SELECT_NUMBER, label))));
+                    row.add(new VkButton(new VkButtonActionCallback(label, new VkButtonPayload(Type.TEMPLATE_SELECT_NUMBER, label))));
                 }
                 grid.add(row);
             }
@@ -83,16 +84,16 @@ public class TemplateCommandHandler implements CommandHandler.Callback {
             requestBuilder.text(b.getString(prefix + ".subject"));
         }
         grid.add(List.of(KeyboardUtils.newCancelButton(b)));
-        requestBuilder.keyboard(MessageKeyboard.newInline(grid));
+        requestBuilder.keyboard(MessageKeyboard.fromGrid(grid));
         messageService.sendOrEditMessage(session, requestBuilder.build());
     }
 
-    public void onSelectNumber(VkEventMessage.Event evt, Session session) {
+    public void onSelectNumber(Session session, VkEventMessage.Event evt) {
     }
 
-    public void onWriteSubject(VkEventMessage.New evt, Session session) {
+    public void onWriteSubject(Session session, VkEventMessage.New evt) {
     }
 
-    public void onWriteTopic(VkEventMessage.New evt, Session session) {
+    public void onWriteTopic(Session session, VkEventMessage.New evt) {
     }
 }

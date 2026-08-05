@@ -10,6 +10,7 @@ import java.util.Map;
 import ru.senioravanti.vkbot.models.vk.VkBirthday;
 import ru.senioravanti.vkbot.models.vk.attachments.VkAttachment;
 import ru.senioravanti.vkbot.models.vk.attachments.VkAttachmentDeserializer;
+import ru.senioravanti.vkbot.models.vk.method.docs.DocsSave;
 
 public class JacksonConfig {
     private JacksonConfig() {
@@ -24,6 +25,7 @@ public class JacksonConfig {
             .addModule(new SimpleModule()
                 .addDeserializer(VkAttachment.class, new VkAttachmentDeserializer())
                 .addDeserializer(VkBirthday.class, new VkBirthday.Deserializer())
+                .addDeserializer(DocsSave.Response.class, new DocsSave.ResponseDeserializer())
             )
             .build();
     }

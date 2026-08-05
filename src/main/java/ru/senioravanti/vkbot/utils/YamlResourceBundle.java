@@ -53,7 +53,7 @@ public class YamlResourceBundle extends ResourceBundle {
             ClassLoader loader,
             boolean reload
         ) {
-            if (!getFormats(baseName).contains(format)) throw new IllegalArgumentException("Unknown format: " + format);
+            if (!getFormats(baseName).contains(format)) throw new IllegalArgumentException("Unknown formatData: " + format);
 
             String bundleName = toBundleName(baseName, locale);
             String resourceName = toResourceName(bundleName, format);
