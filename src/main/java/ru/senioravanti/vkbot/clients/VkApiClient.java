@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JavaType;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -34,7 +32,7 @@ import ru.senioravanti.vkbot.models.vk.method.Method;
 import ru.senioravanti.vkbot.utils.MiscellaneousUtils;
 import ru.senioravanti.vkbot.utils.HttpClientUtils;
 
-import static ru.senioravanti.vkbot.config.JacksonConfig.OBJECT_TYPE_REFERENCE;
+import static ru.senioravanti.vkbot.config.JacksonConfig.JSON_MAP;
 
 @RequiredArgsConstructor
 public class VkApiClient {
@@ -47,7 +45,7 @@ public class VkApiClient {
 
     public <T1, T2> T2 call(Method<T1, T2> m) {
         var queryParams = jsonMapper
-            .convertValue(m.params(), OBJECT_TYPE_REFERENCE)
+            .convertValue(m.params(), JSON_MAP)
             .entrySet().stream()
             .map(it -> {
                 var value = it.getValue();
@@ -76,7 +74,7 @@ public class VkApiClient {
                     .build(),
                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
-            var rawBody = jsonMapper.readValue(response.body(), OBJECT_TYPE_REFERENCE);
+            var rawBody = jsonMapper.readValue(response.body(), JSON_MAP);
             LOGGER.trace(new CustomMapMessage(rawBody));
             var body = jsonMapper.convertValue(rawBody, m.responseType());
             if (body.error() != null) throw new VkApiCustomException(m.name(), body.error());
@@ -92,7 +90,7 @@ public class VkApiClient {
     public <T1, T2> T2 callMultipart(String uri, T1 form, Class<T2> responseType, Map<String, String> headers) {
         var boundary = UUID.randomUUID().toString();
         try {
-            var formFieldMap = new HashMap<>(jsonMapper.convertValue(form, OBJECT_TYPE_REFERENCE));
+            var formFieldMap = new HashMap<>(jsonMapper.convertValue(form, JSON_MAP));
             formFieldMap.put("v", props.api().version());
             var requestBuilder = HttpRequest.newBuilder(URI.create(uri))
                 .POST(HttpClientUtils.ofMimeMultipartData(formFieldMap, boundary))
@@ -102,7 +100,7 @@ public class VkApiClient {
                 requestBuilder.build(),
                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
-            var rawBody = jsonMapper.readValue(response.body(), OBJECT_TYPE_REFERENCE);
+            var rawBody = jsonMapper.readValue(response.body(), JSON_MAP);
             LOGGER.trace(new CustomMapMessage(rawBody));
             var responseParametricType = jsonMapper.getTypeFactory()
                 .constructParametricType(VkResponse.class, responseType);

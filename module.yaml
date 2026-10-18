@@ -1,0 +1,50 @@
+# https://kotlin-toolchain.org/latest/user-guide/product-types/jvm-app/?h=fat+jar#packaging
+# kotlin package
+product: jvm/app
+
+layout: maven-like
+
+settings:
+  jvm:
+    jdk:
+      version: 25
+    release: 25
+    mainClass: ru.senioravanti.vkbot.App
+  publishing:
+    enabled: false
+    artifactId: vkbot
+    group: ru.senioravanti
+    version: 1.0.0
+  java:
+    annotationProcessing:
+      processors:
+        - org.projectlombok:lombok:1.18.42
+
+repositories:
+  - id: mavenLocal
+    url: mavenLocal
+  - id: jitpack.io
+    url: https://jitpack.io
+  - id: github
+    url: https://maven.pkg.github.com/senioravanti/java-commons-files
+    publish: true
+    credentials:
+      file: github.creds.properties
+      usernameKey: username
+      passwordKey: password
+
+dependencies:
+  - com.github.senioravanti:java-commons-loggers:2.0.5
+  - ru.senioravanti.commons:files:1.0.0
+  - org.jspecify:jspecify:1.0.0: exported
+  - org.projectlombok:lombok:1.18.42: compile-only
+  - tools.jackson.core:jackson-databind:3.2.2
+  - tools.jackson.core:jackson-core:3.2.2
+  - tools.jackson.dataformat:jackson-dataformat-yaml:3.2.2
+  - org.docx4j:docx4j-JAXB-ReferenceImpl:17.0.1: exported
+  - org.commonmark:commonmark:0.29.0: exported
+  - org.apache.commons:commons-text:1.15.0: exported
+
+test-dependencies:
+  - org.junit.jupiter:junit-jupiter-api:6.1.1
+  - com.jayway.jsonpath:json-path:3.0.0

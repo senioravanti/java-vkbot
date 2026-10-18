@@ -1,12 +1,13 @@
 # Служебный ВК бот
 
-Сборка и запуск
+## Разное
 
-```sh
-clear
-mvn package -Dmaven.test.skip=true
-set -a; . ./.env; set +a; java -jar ./target/vkbot-1.0.0.jar
-```
+`echo '' | sort | grep '\S' | copy-osc52` :: Сортировать импорты
+
+## Сборка и запуск
+
+`kotlin package` :: Сборка
+`sh -c 'set -a; . ./.env; set +a; kotlin run --jvm-args="-Xmx384m -Dapp.artifact-id=$(yq -r ".settings.publishing.artifactId" module.yaml) -Dapp.group=$(yq -r ".settings.publishing.group" module.yaml) -Dapp.version=$(yq -r ".settings.publishing.version" module.yaml)"'` :: Запуск
 
 ## Переменные среды
 

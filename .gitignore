@@ -18,5 +18,10 @@ target/
 *.ipr
 
 .env*
+build/
 logs/
 settings.xml
+
+kotlin
+kotlin.bat
+*creds.properties

@@ -1,17 +1,17 @@
 package ru.senioravanti.vkbot.utils;
 
-import tools.jackson.dataformat.yaml.YAMLMapper;
+import org.jspecify.annotations.NonNull;
 
 import java.io.InputStream;
 import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
-import static ru.senioravanti.vkbot.config.JacksonConfig.OBJECT_TYPE_REFERENCE;
+import ru.senioravanti.vkbot.config.JacksonConfig;
+
+import static ru.senioravanti.vkbot.config.JacksonConfig.JSON_MAP;
 
 public class YamlResourceBundle extends ResourceBundle {
-    private static final YAMLMapper YAML = new YAMLMapper();
-
     private final Map<String, Object> entries;
 
     public YamlResourceBundle(InputStream docs) {
@@ -23,17 +23,17 @@ public class YamlResourceBundle extends ResourceBundle {
     }
 
     @Override
-    public Enumeration<String> getKeys() {
+    public @NonNull Enumeration<String> getKeys() {
         return Collections.enumeration(entries.keySet());
     }
 
     @Override
-    protected Set<String> handleKeySet() {
+    protected @NonNull Set<String> handleKeySet() {
         return entries.keySet();
     }
 
     @Override
-    protected Object handleGetObject(String key) {
+    protected Object handleGetObject(@NonNull String key) {
         return entries.get(key);
     }
 
@@ -53,7 +53,8 @@ public class YamlResourceBundle extends ResourceBundle {
             ClassLoader loader,
             boolean reload
         ) {
-            if (!getFormats(baseName).contains(format)) throw new IllegalArgumentException("Unknown formatData: " + format);
+            if (!getFormats(baseName).contains(format))
+                throw new IllegalArgumentException("Unknown formatData: " + format);
 
             String bundleName = toBundleName(baseName, locale);
             String resourceName = toResourceName(bundleName, format);
@@ -75,7 +76,7 @@ public class YamlResourceBundle extends ResourceBundle {
 
     private static class Parser {
         static Map<String, Object> parseDocs(InputStream input) {
-            var root = YAML.readValue(input, OBJECT_TYPE_REFERENCE);
+            var root = JacksonConfig.INSTANCE.yamlMapper().readValue(input, JSON_MAP);
             var entries = new LinkedHashMap<String, Object>();
             root.forEach((k, v) -> flatten(k, v, entries));
             return entries.entrySet().stream()

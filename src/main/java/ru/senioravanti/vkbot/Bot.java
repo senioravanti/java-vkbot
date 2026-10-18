@@ -13,14 +13,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpClient;
 
-import static java.util.Map.entry;
-
+import ru.senioravanti.commons.loggers.CustomMapMessage.Entry;
 import ru.senioravanti.commons.loggers.CustomMapMessage;
 import ru.senioravanti.vkbot.clients.VkApiClient;
-import ru.senioravanti.vkbot.models.vk.method.groups.GroupsGetLongPollServer;
-import ru.senioravanti.vkbot.models.vk.LongPollResponse;
-import ru.senioravanti.vkbot.models.vk.LongPollResponse.Failure;
 import ru.senioravanti.vkbot.handlers.Router;
+import ru.senioravanti.vkbot.models.vk.LongPollResponse.Failure;
+import ru.senioravanti.vkbot.models.vk.LongPollResponse;
+import ru.senioravanti.vkbot.models.vk.method.groups.GroupsGetLongPollServer;
 
 @RequiredArgsConstructor
 public class Bot implements Runnable {
@@ -68,7 +67,7 @@ public class Bot implements Runnable {
                 var request = new GroupsGetLongPollServer.Request(groupId);
                 var longPollServer = vkApiClient.call(new GroupsGetLongPollServer(request));
                 LOGGER.info(CustomMapMessage.of("vk bot successfully started ...",
-                    entry("server", longPollServer.server())
+                    new Entry("server", longPollServer.server())
                 ));
                 poll(longPollServer);
             } catch (IOException | InterruptedException  ex) {

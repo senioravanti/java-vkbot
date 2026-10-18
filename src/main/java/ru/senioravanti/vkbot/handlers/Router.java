@@ -9,9 +9,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 
-import static java.util.Map.entry;
-
 import ru.senioravanti.commons.loggers.CustomMapMessage;
+import ru.senioravanti.commons.loggers.CustomMapMessage.Entry;
 import ru.senioravanti.vkbot.models.vk.events.VkEvent;
 import ru.senioravanti.vkbot.models.vk.events.VkEventMessage;
 import ru.senioravanti.vkbot.models.vk.VkMessage;
@@ -50,9 +49,9 @@ public class Router {
                 handler.handle(object);
             } catch (IllegalArgumentException ex) {
                 LOGGER.error(CustomMapMessage.of("failed to convert", ex,
-                    entry("event", update.type().getName()),
-                    entry("object", update.object()),
-                    entry("type", type.getName())
+                    new Entry("event", update.type().getName()),
+                    new Entry("object", update.object()),
+                    new Entry("type", type.getName())
                 ));
             }
         };
